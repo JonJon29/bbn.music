@@ -166,7 +166,7 @@ const wizard = creationState.page.map((page) => {
             Grid(
                 SecondaryButton("Back").setJustifyContent("center").onClick(() => creationState.page.setValue(3)),
                 PrimaryButton("Submit").onPromiseClick(async () => {
-                    validator(page);
+                    await validator(page)();
 
                     await API.postTypeByTypeByDropByMusic({
                         path: {
