@@ -5,7 +5,7 @@ import { asRef, asRefRecord, Box, Checkbox, createFilePicker, DropDown, Empty, E
 import countries from "../../../data/countries.json" with { type: "json" };
 import genres from "../../../data/genres.json" with { type: "json" };
 import languages from "../../../data/language.json" with { type: "json" };
-import { API, Artist, ArtistRef, Song, stupidErrorAlert, zArtistTypes } from "../../../spec/mod.ts";
+import { API, APITools, Artist, ArtistRef, Song, stupidErrorAlert, zArtistTypes } from "../../../spec/mod.ts";
 import { uploadSong } from "../data.ts";
 import "./table.css";
 
@@ -15,7 +15,7 @@ const songSheet = (song: RefRecord<Song>, save: (song: RefRecord<Song>) => void,
     if (!song.country) {
         song.country = asRef("DE");
     }
-    const blobRef = asRef<Blob | MediaSource | undefined>(undefined);
+    const blobRef = asRef<{ url: string; authToken: string } | undefined>(undefined);
     return Grid(
         SheetHeader("Edit Song", sheetStack),
         Grid(
@@ -41,39 +41,15 @@ const songSheet = (song: RefRecord<Song>, save: (song: RefRecord<Song>) => void,
             ).setGap().setDynamicColumns(15),
             Box(blobRef.map((blob) =>
                 blob === undefined
-                    ? SecondaryButton("Listen to Song").onPromiseClick(async () => {
-                        if ("MediaSource" in globalThis && MediaSource.isTypeSupported("audio/wav")) {
-                            console.log("Using MediaSource for audio playback");
-                            const mediaSource = new MediaSource();
-                            blobRef.setValue(mediaSource);
-                            mediaSource.addEventListener("sourceopen", async () => {
-                                const sourceBuffer = mediaSource.addSourceBuffer("audio/wav");
-                                const reader = (await API.getDownloadBySongBySongsByMusic({ path: { songId: song._id.value } })).request.body?.getReader();
-                                if (!reader) {
-                                    throw new Error("Failed to get reader for song data");
-                                }
+                    ? SecondaryButton("Listen to Song").onClick(() => {
+                        const baseUrl = APITools.baseUrl();
+                        const token = APITools.token();
+                        const streamUrl = `${baseUrl}api/@bbn/music/songs/${song._id.value}/download`;
 
-                                async function appendToBuffer() {
-                                    const read = await reader.read();
-                                    if (read.done) {
-                                        mediaSource.endOfStream();
-                                        return;
-                                    }
-                                    console.log(read);
-                                    sourceBuffer.appendBuffer(read.value.buffer as BufferSource);
-                                }
-
-                                sourceBuffer.addEventListener("updateend", function (_) {
-                                    // video.setAttribute("controls", "controls");
-                                    appendToBuffer();
-                                });
-
-                                // Kick off initial loading
-                                appendToBuffer();
-                            });
-                        } else {
-                            await API.getDownloadBySongBySongsByMusic({ path: { songId: song._id.value } }).then(stupidErrorAlert).then((blob) => blobRef.setValue(blob));
-                        }
+                        blobRef.setValue({
+                            url: streamUrl,
+                            authToken: token,
+                        });
                     })
                     : Audio(blob).setAutoplay()
             )),

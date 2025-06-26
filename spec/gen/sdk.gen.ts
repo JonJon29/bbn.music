@@ -63,7 +63,6 @@ import type {
     GetSlugByShareByMusicData,
     GetSongsByMusicData,
     GetSongsByMusicResponse,
-    GetStatsByPublicData,
     GetTokenByFromUserInteractionByAuthData,
     GetUploadByApplicationsByOauthData,
     GetUploadByAvatarBySetMeByUserData,
@@ -1094,17 +1093,6 @@ export const getIdByPayoutsByPayment = <ThrowOnError extends boolean = false>(op
         },
         url: "/api/@bbn/payment/payouts/{id}",
         ...options,
-    });
-};
-
-export const getStatsByPublic = <ThrowOnError extends boolean = false>(options?: Options<GetStatsByPublicData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).get<unknown, unknown, ThrowOnError>({
-        url: "/api/@bbn/public/stats",
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...options?.headers,
-        },
     });
 };
 

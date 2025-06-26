@@ -73,6 +73,7 @@ serve({
         "favicon.ico": "./static/favicon.ico",
         "email-header.png": "./static/email-header.png",
         "app.webmanifest": "./static/app.webmanifest",
+        "audio-sw.js": "./static/audio-sw.js",
         ".well-known/passkey-endpoints": "./static/.well-known/passkey-endpoints",
         "images/icons/icon-72x72.png": "./static/images/icons/icon-72x72.png",
         "images/icons/icon-96x96.png": "./static/images/icons/icon-96x96.png",

@@ -232,7 +232,7 @@ export const zSingleAdminDrop = z.object({
             z.object({
                 action: z.literal("drop-type-change"),
                 dropId: z.string(),
-                type: zDropType.optional(),
+                type: zDropType,
                 data: z.object({
                     gtin: z.string().optional(),
                     title: z.string(),
@@ -411,7 +411,7 @@ export const zAudit = z.union([
     z.object({
         action: z.literal("drop-type-change"),
         dropId: z.string(),
-        type: zDropType.optional(),
+        type: zDropType,
         data: z.object({
             gtin: z.string().optional(),
             title: z.string(),

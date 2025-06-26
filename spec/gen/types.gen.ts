@@ -223,7 +223,7 @@ export type Audit = {
 } | {
     action: "drop-type-change";
     dropId: string;
-    type?: DropType;
+    type: DropType;
     data?: FullDrop;
 } | {
     action: "drop-create";
@@ -1464,15 +1464,6 @@ export type GetIdByPayoutsByPaymentResponses = {
 };
 
 export type GetIdByPayoutsByPaymentResponse = GetIdByPayoutsByPaymentResponses[keyof GetIdByPayoutsByPaymentResponses];
-
-export type GetStatsByPublicData = {
-    body?: {
-        [key: string]: unknown;
-    };
-    path?: never;
-    query?: never;
-    url: "/api/@bbn/public/stats";
-};
 
 export type PutPlaceholderByTasksData = {
     body?: {
