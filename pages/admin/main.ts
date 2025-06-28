@@ -4,6 +4,7 @@ import "./pages/oauth.ts";
 import "./pages/overview.ts";
 import "./pages/payouts.ts";
 import "./pages/publishing.ts";
+import "./pages/published.ts";
 import "./pages/reviews.ts";
 import "./pages/search.ts";
 import "./pages/wallets.ts";
