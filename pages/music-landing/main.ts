@@ -267,6 +267,9 @@ appendBody(
                                     height: 50px;
                                     border-radius: 0.8rem;
                                 }
+                                button:hover {
+                                    cursor: not-allowed;
+                                }
                             `),
                     )
                         .setGap("30px")
