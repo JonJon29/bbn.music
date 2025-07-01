@@ -529,7 +529,7 @@ export const zAdminWallet = z.object({
         description: z.string(),
         counterParty: z.string(),
     })),
-    cut: z.string(),
+    cut: z.number(),
     user: zObjectId,
     userName: z.string().optional(),
     email: z.string().optional(),
