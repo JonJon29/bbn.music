@@ -77,10 +77,14 @@ const validator = (page: number) => async () => {
         return;
     }
     creationState.validationState.setValue(undefined);
-    await API.patchIdByDropsByMusic({ path: { id: dropId }, body: Object.fromEntries(Object.entries(creationState).map(([key, state]) => [key, state.value])) });
+    await saveDrop()
     creationState.page.setValue(page + 1);
     creationState.validationState.setValue(undefined);
 };
+
+async function saveDrop() {
+    await API.patchIdByDropsByMusic({ path: { id: dropId }, body: Object.fromEntries(Object.entries(creationState).map(([key, state]) => [key, state.value])) });
+}
 
 const footer = (page: number) =>
     Grid(
@@ -166,8 +170,8 @@ const wizard = creationState.page.map((page) => {
             Grid(
                 SecondaryButton("Back").setJustifyContent("center").onClick(() => creationState.page.setValue(3)),
                 PrimaryButton("Submit").onPromiseClick(async () => {
-                    await validator(page)();
-
+                    await saveDrop();
+                    
                     await API.postTypeByTypeByDropByMusic({
                         path: {
                             dropId,
