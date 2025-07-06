@@ -1,5 +1,5 @@
 import { activeUser, allowedImageFormats, ErrorMessage, permCheck, ProfileData, RegisterAuthRefresh, sheetStack, showProfilePicture, streamingImages } from "shared/helper.ts";
-import { appendBody, asRef, asRefRecord, Box, Checkbox, Content, createFilePicker, createRoute, css, DateInput, DialogContainer, DropDown, Empty, FullWidthSection, Grid, Image, isMobile, Label, PrimaryButton, SecondaryButton, Spinner, StartRouting, TextAreaInput, TextInput, WebGenTheme } from "webgen/mod.ts";
+import { appendBody, asRef, asRefRecord, Box, CachedPages, Checkbox, Content, createCachedLoader, createFilePicker, createIndexPaginationLoader, createRoute, css, DateInput, DialogContainer, DropDown, Empty, FullWidthSection, Grid, Image, isMobile, Label, PrimaryButton, SecondaryButton, Spinner, StartRouting, TextAreaInput, TextButton, TextInput, WebGenTheme } from "webgen/mod.ts";
 import { DynaNavigation } from "../../components/nav.ts";
 import { AdminDrop, API, Artist, ArtistRef, DropType, FullDrop, Share, Song, stupidErrorAlert, User, UserHistoryEvent, zArtistTypes, zDropType, zObjectId } from "../../spec/mod.ts";
 
@@ -44,13 +44,12 @@ const genres = asRefRecord({
 
 const share = asRef(<undefined | Share> undefined);
 
-const drops = asRef(<undefined | AdminDrop[]> undefined);
-
 const events = asRef(<UserHistoryEvent[]> []);
 const userProfile = asRef(<User | undefined> undefined);
 const userArtists = asRef(<Artist[] | undefined> undefined);
 
 const id = asRef(<string | undefined> undefined);
+let loader: CachedPages<AdminDrop> | undefined = undefined;
 const mainRoute = createRoute({
     path: "/c/music/edit",
     search: {
@@ -91,9 +90,11 @@ const mainRoute = createRoute({
                 events.setValue(adminDrop?.events ?? []);
                 userProfile.setValue(adminDrop?.userInfo);
                 userArtists.setValue(adminDrop?.artistList);
-                API.getDropsByAdmin({ query: { user: drop.user! } }).then(stupidErrorAlert).then((val) => {
-                    drops.setValue(val);
-                });
+                loader = createCachedLoader(createIndexPaginationLoader({
+                    limit: 30,
+                    loader: (offset, limit) => API.getDropsByAdmin({ query: { user: drop.user!, offset: offset, limit: limit } }).then(stupidErrorAlert),
+                }));
+                loader.next();
             }
         },
     },
@@ -429,7 +430,18 @@ appendBody(
                                     ).setGap(),
                                     Grid(events.map((val) => val.map(userHistoryEventEntry))),
                                 ).setHeight("min-content"),
-                                Grid(drops.map((val) => val ? val.map((x) => DropEntry(x, true)) : Spinner())),
+                                loader
+                                    ? Grid(
+                                        loader.items.map((val) => val ? val.map((x) => DropEntry(x, true)) : Spinner()) ?? Empty(),
+                                        Box(loader.hasMore.map((hasMore) =>
+                                            hasMore
+                                                ? TextButton("Load More").onPromiseClick(async () => {
+                                                    await loader!.next();
+                                                })
+                                                : Label("No more reviews (no way)")
+                                        )),
+                                    )
+                                    : Grid(Empty()),
                             ).setEvenColumns(isMobile ? 1 : 2).setGap()
                         )),
                     )
