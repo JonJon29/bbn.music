@@ -303,7 +303,7 @@ export type AdminWallet = {
         description: string;
         counterParty: string;
     }>;
-    cut: string;
+    cut: number;
     user: ObjectId;
     userName?: string;
     email?: string;
