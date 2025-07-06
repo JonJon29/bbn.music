@@ -49,7 +49,7 @@ const userProfile = asRef(<User | undefined> undefined);
 const userArtists = asRef(<Artist[] | undefined> undefined);
 
 const id = asRef(<string | undefined> undefined);
-let loader: CachedPages<AdminDrop> | undefined = undefined;
+const loader = asRef(<CachedPages<AdminDrop> | undefined> undefined);
 const mainRoute = createRoute({
     path: "/c/music/edit",
     search: {
@@ -90,11 +90,11 @@ const mainRoute = createRoute({
                 events.setValue(adminDrop?.events ?? []);
                 userProfile.setValue(adminDrop?.userInfo);
                 userArtists.setValue(adminDrop?.artistList);
-                loader = createCachedLoader(createIndexPaginationLoader({
+                loader.set(createCachedLoader(createIndexPaginationLoader({
                     limit: 30,
                     loader: (offset, limit) => API.getDropsByAdmin({ query: { user: drop.user!, offset: offset, limit: limit } }).then(stupidErrorAlert),
-                }));
-                loader.next();
+                })));
+                loader.get()?.next();
             }
         },
     },
@@ -430,18 +430,20 @@ appendBody(
                                     ).setGap(),
                                     Grid(events.map((val) => val.map(userHistoryEventEntry))),
                                 ).setHeight("min-content"),
-                                loader
-                                    ? Grid(
-                                        loader.items.map((val) => val ? val.map((x) => DropEntry(x, true)) : Spinner()) ?? Empty(),
-                                        Box(loader.hasMore.map((hasMore) =>
-                                            hasMore
-                                                ? TextButton("Load More").onPromiseClick(async () => {
-                                                    await loader!.next();
-                                                })
-                                                : Label("No more reviews (no way)")
-                                        )),
-                                    )
-                                    : Grid(Empty()),
+                                Box(loader.map((loader) =>
+                                    loader
+                                        ? Grid(
+                                            loader.items.map((val) => val ? val.map((x) => DropEntry(x, true)) : Spinner()) ?? Empty(),
+                                            Box(loader.hasMore.map((hasMore) =>
+                                                hasMore
+                                                    ? TextButton("Load More").onPromiseClick(async () => {
+                                                        await loader.next();
+                                                    })
+                                                    : Label("No more reviews (no way)")
+                                            )),
+                                        )
+                                        : Grid(Empty())
+                                )),
                             ).setEvenColumns(isMobile ? 1 : 2).setGap()
                         )),
                     )
