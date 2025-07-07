@@ -13,6 +13,8 @@ import { EditArtistsDialog, ManageSongs } from "./views/table.ts";
 
 await RegisterAuthRefresh();
 
+const recordGenres: Record<string, string[]> = genres
+
 const isAdmin = permCheck(
     "/hmsys/user/manage",
     "/bbn/manage",
@@ -99,7 +101,9 @@ creationState.primaryGenre.listen((val) => {
         return song;
     }));
     if (val) {
-        creationState.secondaryGenre.setValue(undefined);
+        if (Object.keys(genres).includes(val) && !recordGenres[val].includes(creationState.secondaryGenre.value ?? "")) {
+            creationState.secondaryGenre.setValue(recordGenres[val][0]);
+        }
     }
 });
 
