@@ -29,8 +29,6 @@ import type {
     GetFullArtworkByDropByMusicData,
     GetFulldropByMusicData,
     GetFulldropByMusicResponse,
-    GetGenresByMusicData,
-    GetGenresByMusicResponse,
     GetGroupsByAdminData,
     GetGroupsByAdminResponse,
     GetIdByChatsByWhatsappData,
@@ -125,7 +123,6 @@ import {
     zGetDropsByAdminResponse,
     zGetDropsByMusicResponse,
     zGetFulldropByMusicResponse,
-    zGetGenresByMusicResponse,
     zGetGroupsByAdminResponse,
     zGetIdByChatsByWhatsappResponse,
     zGetIdByDropsByAdminResponse,
@@ -762,22 +759,6 @@ export const getFulldropByMusic = <ThrowOnError extends boolean = false>(options
             return await zGetFulldropByMusicResponse.parseAsync(data);
         },
         url: "/api/@bbn/music/fulldrop",
-        ...options,
-    });
-};
-
-export const getGenresByMusic = <ThrowOnError extends boolean = false>(options?: Options<GetGenresByMusicData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).get<GetGenresByMusicResponse, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: "bearer",
-                type: "http",
-            },
-        ],
-        responseValidator: async (data) => {
-            return await zGetGenresByMusicResponse.parseAsync(data);
-        },
-        url: "/api/@bbn/music/genres",
         ...options,
     });
 };

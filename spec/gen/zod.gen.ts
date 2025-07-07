@@ -862,11 +862,6 @@ export const zGetIdByShareByDropsByMusicResponse = z.union([
 
 export const zGetFulldropByMusicResponse = z.array(zFullDrop);
 
-export const zGetGenresByMusicResponse = z.object({
-    primary: z.array(z.string()),
-    secondary: z.object({}),
-});
-
 export const zGetIdByProviderByPublishByMusicResponse = z.boolean();
 
 export const zGetIdByShazamByMusicResponse = z.null();

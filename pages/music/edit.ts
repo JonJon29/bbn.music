@@ -1,11 +1,11 @@
-import { activeUser, allowedImageFormats, ErrorMessage, permCheck, ProfileData, RegisterAuthRefresh, sheetStack, showProfilePicture, streamingImages } from "shared/helper.ts";
-import { appendBody, asRef, asRefRecord, Box, CachedPages, Checkbox, Content, createCachedLoader, createFilePicker, createIndexPaginationLoader, createRoute, css, DateInput, DialogContainer, DropDown, Empty, FullWidthSection, Grid, Image, isMobile, Label, PrimaryButton, SecondaryButton, Spinner, StartRouting, TextAreaInput, TextButton, TextInput, WebGenTheme } from "webgen/mod.ts";
-import { DynaNavigation } from "../../components/nav.ts";
-import { AdminDrop, API, Artist, ArtistRef, DropType, FullDrop, Share, Song, stupidErrorAlert, User, UserHistoryEvent, zArtistTypes, zDropType, zObjectId } from "../../spec/mod.ts";
-
+import { activeUser, allowedImageFormats, ErrorMessage, getSecondary, permCheck, ProfileData, RegisterAuthRefresh, sheetStack, showProfilePicture, streamingImages } from "shared/helper.ts";
 import { userHistoryEventEntry } from "shared/userHistoryEventEntry.ts";
+import { appendBody, asRef, asRefRecord, Box, CachedPages, Checkbox, Content, createCachedLoader, createFilePicker, createIndexPaginationLoader, createRoute, css, DateInput, DialogContainer, DropDown, Empty, FullWidthSection, Grid, Image, isMobile, Label, PrimaryButton, SecondaryButton, Spinner, StartRouting, TextAreaInput, TextButton, TextInput, WebGenTheme } from "webgen/mod.ts";
 import { templateArtwork } from "../../assets/imports.ts";
+import { DynaNavigation } from "../../components/nav.ts";
+import genres from "../../data/genres.json" with { type: "json" };
 import languages from "../../data/language.json" with { type: "json" };
+import { AdminDrop, API, Artist, ArtistRef, DropType, FullDrop, Share, Song, stupidErrorAlert, User, UserHistoryEvent, zArtistTypes, zDropType, zObjectId } from "../../spec/mod.ts";
 import { uploadArtwork } from "./data.ts";
 import { pageThree } from "./validator.ts";
 import { DropEntry } from "./views/list.ts";
@@ -35,11 +35,6 @@ const creationState = asRefRecord({
     comments: <string | undefined> undefined,
     user: <string | undefined> undefined,
     type: <DropType | undefined> undefined,
-});
-
-const genres = asRefRecord({
-    primary: <string[]> [],
-    secondary: <Record<string, string[]>> {},
 });
 
 const share = asRef(<undefined | Share> undefined);
@@ -78,10 +73,6 @@ const mainRoute = createRoute({
 
             disabled.setValue(drop.type !== "PRIVATE" && drop.type !== "UNSUBMITTED");
 
-            API.getGenresByMusic().then(stupidErrorAlert).then((x) => {
-                genres.primary.setValue(x.primary);
-                genres.secondary.setValue(x.secondary);
-            });
             try {
                 API.getIdByShareByDropsByMusic({ path: { id: id.value } }).then((req) => stupidErrorAlert(req, false)).then((val) => val ? share.setValue(val) : undefined);
                 // deno-lint-ignore no-empty
@@ -108,9 +99,7 @@ creationState.primaryGenre.listen((val) => {
         return song;
     }));
     if (val) {
-        if (Object.keys(genres.secondary.value).includes(val) && !genres.secondary.value[val].includes(creationState.secondaryGenre.value ?? "")) {
-            creationState.secondaryGenre.setValue(genres.secondary.value[val][0]);
-        }
+        creationState.secondaryGenre.setValue(undefined);
     }
 });
 
@@ -319,12 +308,10 @@ appendBody(
                             SecondaryButton("Artists").onClick(() => {
                                 sheetStack.addSheet(EditArtistsDialog(creationState.artists, userArtists.value, disabled));
                             }),
-                            Box(genres.primary.map((_) =>
-                                Grid(
-                                    DropDown(genres.primary, creationState.primaryGenre, "Primary Genre").setDisabled(disabled),
-                                    Box(genres.secondary.map((secondaryGenres) => secondaryGenres ? Box(creationState.primaryGenre.map((primaryGenre) => DropDown(primaryGenre && secondaryGenres[primaryGenre] ? secondaryGenres[primaryGenre] : [], creationState.secondaryGenre, "Secondary Genre").setDisabled(disabled))) : Empty())), //.setValueRender((x) => (genres.secondary.value[creationState.primaryGenre.value ?? ""])[x] ?? ""),
-                                ).setEvenColumns(isMobile.map((val) => val ? 1 : 2)).setGap()
-                            )),
+                            Grid(
+                                DropDown(Object.keys(genres), creationState.primaryGenre, "Primary Genre"),
+                                DropDown(getSecondary(genres, creationState.primaryGenre), creationState.secondaryGenre, "Secondary Genre"),
+                            ).setEvenColumns(isMobile.map((val) => val ? 1 : 2)).setGap(),
                             Grid(
                                 TextInput(creationState.compositionCopyright, "Composition Copyright").setDisabled(true),
                                 TextInput(creationState.soundRecordingCopyright, "Sound Recording Copyright").setDisabled(true),
