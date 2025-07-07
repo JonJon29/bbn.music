@@ -309,8 +309,8 @@ appendBody(
                                 sheetStack.addSheet(EditArtistsDialog(creationState.artists, userArtists.value, disabled));
                             }),
                             Grid(
-                                DropDown(Object.keys(genres), creationState.primaryGenre, "Primary Genre"),
-                                DropDown(getSecondary(genres, creationState.primaryGenre), creationState.secondaryGenre, "Secondary Genre"),
+                                DropDown(Object.keys(genres), creationState.primaryGenre, "Primary Genre").setDisabled(disabled),
+                                DropDown(getSecondary(genres, creationState.primaryGenre), creationState.secondaryGenre, "Secondary Genre").setDisabled(disabled),
                             ).setEvenColumns(isMobile.map((val) => val ? 1 : 2)).setGap(),
                             Grid(
                                 TextInput(creationState.compositionCopyright, "Composition Copyright").setDisabled(true),
