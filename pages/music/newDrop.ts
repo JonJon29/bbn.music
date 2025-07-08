@@ -79,8 +79,7 @@ const validator = (page: number) => async () => {
     if(page == 1){
         const releaseDate = new Date(creationState.release.value);
         const releaseDateLimit = new Date();
-        releaseDateLimit.setDate(releaseDateLimit.getDate() + 7);
-        console.log(releaseDateLimit);
+        releaseDateLimit.setDate(releaseDateLimit.getDate() + 14);
         if(releaseDate < releaseDateLimit) {
             alert("Release date must be at least 7 days in the future");
             return;
