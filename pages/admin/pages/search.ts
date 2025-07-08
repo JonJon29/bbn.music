@@ -56,7 +56,7 @@ const userSheet = async (user: User) => {
     ).setGap();
 };
 
-const walletSheet = (wallet: WriteSignal<Wallet>) => {
+export const walletSheet = (wallet: WriteSignal<Wallet>) => {
     const selectedAccountType = asRef(wallet.getValue().accountType);
     selectedAccountType.listen(async (val, oldVal) => {
         if (!oldVal) {

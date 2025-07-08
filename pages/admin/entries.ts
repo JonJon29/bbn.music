@@ -1,8 +1,9 @@
 import { sheetStack, showPreviewImage } from "shared/helper.ts";
 import { BasicEntry } from "shared/mod.ts";
-import { Async, Box, Entry, Image, Label, Spinner } from "webgen/mod.ts";
+import { asRef, Async, Box, Entry, Image, Label, Spinner } from "webgen/mod.ts";
 import { AdminDrop, AdminWallet, API, Group, OAuthApp, PayoutList, stupidErrorAlert } from "../../spec/mod.ts";
 import { editOAuthSheet } from "./sheets.ts";
+import { walletSheet } from "./pages/search.ts";
 
 export function ReviewEntry(x: AdminDrop, small: boolean = false) {
     return Entry(
@@ -24,7 +25,9 @@ export function WalletEntry(wallet: AdminWallet) {
             `${wallet.userName} - ${((wallet.balance?.restrained ?? 0) + (wallet.balance?.unrestrained ?? 0)).toFixed(2).toString()}`,
             `${wallet.email} - ${wallet.user} - ${wallet._id} - ${wallet.cut}% - ${wallet.balance?.restrained.toFixed(2)}/${wallet.balance?.unrestrained.toFixed(2)}`,
         ),
-    );
+    ).onClick(() => {
+        sheetStack.addSheet(Box(walletSheet(asRef(wallet))));
+    });
 }
 
 // deno-lint-ignore no-explicit-any
