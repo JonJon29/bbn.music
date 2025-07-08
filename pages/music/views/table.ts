@@ -1,5 +1,5 @@
 import { Audio } from "shared/audio.ts";
-import { allowedAudioFormats, ExistingSongDialog, sheetStack } from "shared/helper.ts";
+import {allowedAudioFormats, ExistingSongDialog, saveBlob, sheetStack} from "shared/helper.ts";
 import { placeholder } from "shared/list.ts";
 import { asRef, asRefRecord, Box, Checkbox, createFilePicker, DropDown, Empty, Entry, Grid, Label, List, MaterialIcon, PrimaryButton, ref, RefRecord, SecondaryButton, SheetHeader, TextInput, WriteSignal } from "webgen/mod.ts";
 import countries from "../../../data/countries.json" with { type: "json" };
@@ -55,7 +55,7 @@ const songSheet = (song: RefRecord<Song>, save: (song: RefRecord<Song>) => void,
             )),
             SecondaryButton("Download Song").onPromiseClick(() =>
                 API.getDownloadBySongBySongsByMusic({ path: { songId: song._id.value } }).then(stupidErrorAlert).then((blob) => {
-                    globalThis.open(URL.createObjectURL(blob as Blob), "_blank");
+                    saveBlob(blob, `${song.title}.wav`);
                 })
             ),
         ).setGap(),
