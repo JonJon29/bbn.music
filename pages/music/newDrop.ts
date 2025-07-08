@@ -76,6 +76,17 @@ const validator = (page: number) => async () => {
         creationState.validationState.setValue(`${error.issues[0].path[0]}: ${error.issues[0].message}`);
         return;
     }
+    if(page == 1){
+        const releaseDate = new Date(creationState.release.value);
+        const releaseDateLimit = new Date();
+        releaseDateLimit.setDate(releaseDateLimit.getDate() + 7);
+        console.log(releaseDateLimit);
+        if(releaseDate < releaseDateLimit) {
+            alert("Release date must be at least 7 days in the future");
+            return;
+        }
+    }
+
     creationState.validationState.setValue(undefined);
     await API.patchIdByDropsByMusic({ path: { id: dropId }, body: Object.fromEntries(Object.entries(creationState).map(([key, state]) => [key, state.value])) });
     creationState.page.setValue(page + 1);
