@@ -53,6 +53,11 @@ const songSheet = (song: RefRecord<Song>, save: (song: RefRecord<Song>) => void,
                     })
                     : Audio(blob).setAutoplay()
             )),
+            SecondaryButton("Download Song").onPromiseClick(() =>
+                API.getDownloadBySongBySongsByMusic({ path: { songId: song._id.value } }).then(stupidErrorAlert).then((blob) => {
+                    globalThis.open(URL.createObjectURL(blob as Blob), "_blank");
+                })
+            ),
         ).setGap(),
         PrimaryButton("Save").setDisabled(disabled).onClick(() => {
             save(song);

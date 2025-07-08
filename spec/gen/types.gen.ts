@@ -303,7 +303,7 @@ export type AdminWallet = {
         description: string;
         counterParty: string;
     }>;
-    cut: string;
+    cut: number;
     user: ObjectId;
     userName?: string;
     email?: string;
@@ -1132,27 +1132,6 @@ export type GetFulldropByMusicResponses = {
 };
 
 export type GetFulldropByMusicResponse = GetFulldropByMusicResponses[keyof GetFulldropByMusicResponses];
-
-export type GetGenresByMusicData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: "/api/@bbn/music/genres";
-};
-
-export type GetGenresByMusicResponses = {
-    /**
-     * Successful operation
-     */
-    200: {
-        primary: Array<string>;
-        secondary: {
-            [key: string]: Array<string>;
-        };
-    };
-};
-
-export type GetGenresByMusicResponse = GetGenresByMusicResponses[keyof GetGenresByMusicResponses];
 
 export type GetIdByProviderByPublishByMusicData = {
     body?: never;

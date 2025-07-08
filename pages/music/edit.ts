@@ -1,17 +1,19 @@
-import { activeUser, allowedImageFormats, ErrorMessage, permCheck, ProfileData, RegisterAuthRefresh, sheetStack, showProfilePicture, streamingImages } from "shared/helper.ts";
-import { appendBody, asRef, asRefRecord, Box, Checkbox, Content, createFilePicker, createRoute, css, DateInput, DialogContainer, DropDown, Empty, FullWidthSection, Grid, Image, isMobile, Label, PrimaryButton, SecondaryButton, Spinner, StartRouting, TextAreaInput, TextInput, WebGenTheme } from "webgen/mod.ts";
-import { DynaNavigation } from "../../components/nav.ts";
-import { AdminDrop, API, Artist, ArtistRef, DropType, FullDrop, Share, Song, stupidErrorAlert, User, UserHistoryEvent, zArtistTypes, zDropType, zObjectId } from "../../spec/mod.ts";
-
+import { activeUser, allowedImageFormats, ErrorMessage, getSecondary, permCheck, ProfileData, RegisterAuthRefresh, sheetStack, showProfilePicture, streamingImages } from "shared/helper.ts";
 import { userHistoryEventEntry } from "shared/userHistoryEventEntry.ts";
+import { appendBody, asRef, asRefRecord, Box, CachedPages, Checkbox, Content, createCachedLoader, createFilePicker, createIndexPaginationLoader, createRoute, css, DateInput, DialogContainer, DropDown, Empty, FullWidthSection, Grid, Image, isMobile, Label, PrimaryButton, SecondaryButton, Spinner, StartRouting, TextAreaInput, TextButton, TextInput, WebGenTheme } from "webgen/mod.ts";
 import { templateArtwork } from "../../assets/imports.ts";
+import { DynaNavigation } from "../../components/nav.ts";
+import genres from "../../data/genres.json" with { type: "json" };
 import languages from "../../data/language.json" with { type: "json" };
+import { AdminDrop, API, Artist, ArtistRef, DropType, FullDrop, Share, Song, stupidErrorAlert, User, UserHistoryEvent, zArtistTypes, zDropType, zObjectId } from "../../spec/mod.ts";
 import { uploadArtwork } from "./data.ts";
 import { pageThree } from "./validator.ts";
 import { DropEntry } from "./views/list.ts";
 import { EditArtistsDialog, ManageSongs } from "./views/table.ts";
 
 await RegisterAuthRefresh();
+
+const recordGenres: Record<string, string[]> = genres
 
 const isAdmin = permCheck(
     "/hmsys/user/manage",
@@ -37,20 +39,14 @@ const creationState = asRefRecord({
     type: <DropType | undefined> undefined,
 });
 
-const genres = asRefRecord({
-    primary: <string[]> [],
-    secondary: <Record<string, string[]>> {},
-});
-
 const share = asRef(<undefined | Share> undefined);
-
-const drops = asRef(<undefined | AdminDrop[]> undefined);
 
 const events = asRef(<UserHistoryEvent[]> []);
 const userProfile = asRef(<User | undefined> undefined);
 const userArtists = asRef(<Artist[] | undefined> undefined);
 
 const id = asRef(<string | undefined> undefined);
+const loader = asRef(<CachedPages<AdminDrop> | undefined> undefined);
 const mainRoute = createRoute({
     path: "/c/music/edit",
     search: {
@@ -79,10 +75,6 @@ const mainRoute = createRoute({
 
             disabled.setValue(drop.type !== "PRIVATE" && drop.type !== "UNSUBMITTED");
 
-            API.getGenresByMusic().then(stupidErrorAlert).then((x) => {
-                genres.primary.setValue(x.primary);
-                genres.secondary.setValue(x.secondary);
-            });
             try {
                 API.getIdByShareByDropsByMusic({ path: { id: id.value } }).then((req) => stupidErrorAlert(req, false)).then((val) => val ? share.setValue(val) : undefined);
                 // deno-lint-ignore no-empty
@@ -91,9 +83,11 @@ const mainRoute = createRoute({
                 events.setValue(adminDrop?.events ?? []);
                 userProfile.setValue(adminDrop?.userInfo);
                 userArtists.setValue(adminDrop?.artistList);
-                API.getDropsByAdmin({ query: { user: drop.user! } }).then(stupidErrorAlert).then((val) => {
-                    drops.setValue(val);
-                });
+                loader.set(createCachedLoader(createIndexPaginationLoader({
+                    limit: 30,
+                    loader: (offset, limit) => API.getDropsByAdmin({ query: { user: drop.user!, offset: offset, limit: limit } }).then(stupidErrorAlert),
+                })));
+                loader.get()?.next();
             }
         },
     },
@@ -107,8 +101,8 @@ creationState.primaryGenre.listen((val) => {
         return song;
     }));
     if (val) {
-        if (Object.keys(genres.secondary.value).includes(val) && !genres.secondary.value[val].includes(creationState.secondaryGenre.value ?? "")) {
-            creationState.secondaryGenre.setValue(genres.secondary.value[val][0]);
+        if (Object.keys(genres).includes(val) && !recordGenres[val].includes(creationState.secondaryGenre.value ?? "")) {
+            creationState.secondaryGenre.setValue(recordGenres[val][0]);
         }
     }
 });
@@ -210,6 +204,10 @@ const templates = () =>
         "Artwork low quality": [
             `Issue with drop: ${creationState.title.value} [IMPORTANT - Your action required]`,
             `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Drop ${creationState.title.value} with ID (${id.value}) and noticed that the Artwork is low quality.\nThe Artwork needs to be 3000x3000px and not blurry.\nPlease update the Artwork in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${activeUser.username.value}`,
+        ],
+        "Artwork single color": [
+            `Issue with drop: ${creationState.title.value} [IMPORTANT - Your action required]`,
+            `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Drop ${creationState.title.value} with ID (${id.value}) and noticed that the Artwork is a single color.\nApple Music does not accept single color Artworks.\nPlease update the Artwork in the Metadata or let us know if you want to refrain from publishing on Apple Music and resubmit your Drop for review with your choice in the comment field.\n\nBest regards,\n${activeUser.username.value}`,
         ],
         "Takedown Declined": [`${creationState.title.value} Takedown Declined!`, `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Takedown for the Drop ${creationState.title.value} with ID (${id.value}) and I am sorry to inform you that I have declined your request.\nPlease contact us if you have any questions.\n\nBest regards,\n${activeUser.username.value}`],
         "Accepted": [`${creationState.title.value} Accepted!`, `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Drop ${creationState.title.value} with ID (${id.value}) and I am happy to inform you that it has been accepted.\nYour music will now be sent to the stores.\nIt could take up to 72h for all stores to show your Drop.\n\nBest regards,\n${activeUser.username.value}`],
@@ -314,12 +312,10 @@ appendBody(
                             SecondaryButton("Artists").onClick(() => {
                                 sheetStack.addSheet(EditArtistsDialog(creationState.artists, userArtists.value, disabled));
                             }),
-                            Box(genres.primary.map((_) =>
-                                Grid(
-                                    DropDown(genres.primary, creationState.primaryGenre, "Primary Genre").setDisabled(disabled),
-                                    Box(genres.secondary.map((secondaryGenres) => secondaryGenres ? Box(creationState.primaryGenre.map((primaryGenre) => DropDown(primaryGenre && secondaryGenres[primaryGenre] ? secondaryGenres[primaryGenre] : [], creationState.secondaryGenre, "Secondary Genre").setDisabled(disabled))) : Empty())), //.setValueRender((x) => (genres.secondary.value[creationState.primaryGenre.value ?? ""])[x] ?? ""),
-                                ).setEvenColumns(isMobile.map((val) => val ? 1 : 2)).setGap()
-                            )),
+                            Grid(
+                                DropDown(Object.keys(genres), creationState.primaryGenre, "Primary Genre").setDisabled(disabled),
+                                DropDown(getSecondary(genres, creationState.primaryGenre), creationState.secondaryGenre, "Secondary Genre").setDisabled(disabled),
+                            ).setEvenColumns(isMobile.map((val) => val ? 1 : 2)).setGap(),
                             Grid(
                                 TextInput(creationState.compositionCopyright, "Composition Copyright").setDisabled(true),
                                 TextInput(creationState.soundRecordingCopyright, "Sound Recording Copyright").setDisabled(true),
@@ -429,7 +425,20 @@ appendBody(
                                     ).setGap(),
                                     Grid(events.map((val) => val.map(userHistoryEventEntry))),
                                 ).setHeight("min-content"),
-                                Grid(drops.map((val) => val ? val.map((x) => DropEntry(x, true)) : Spinner())),
+                                Box(loader.map((loader) =>
+                                    loader
+                                        ? Grid(
+                                            loader.items.map((val) => val ? val.map((x) => DropEntry(x, true)) : Spinner()) ?? Empty(),
+                                            Box(loader.hasMore.map((hasMore) =>
+                                                hasMore
+                                                    ? TextButton("Load More").onPromiseClick(async () => {
+                                                        await loader.next();
+                                                    })
+                                                    : Label("No more reviews (no way)")
+                                            )),
+                                        )
+                                        : Grid(Empty())
+                                )),
                             ).setEvenColumns(isMobile ? 1 : 2).setGap()
                         )),
                     )

@@ -47,7 +47,7 @@ export function IsLoggedIn(): ProfileData | null {
 }
 
 export function getSecondary(secondary: Record<string, string[]>, primaryGenre?: Reference<string | undefined>) {
-    return primaryGenre ? primaryGenre.map((x) => x ? secondary[x] : null).value : null;
+    return primaryGenre ? primaryGenre.map((x) => x ? secondary[x] : []) : [];
 }
 
 function b64DecodeUnicode(value: string) {
