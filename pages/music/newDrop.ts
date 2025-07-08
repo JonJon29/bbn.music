@@ -81,8 +81,16 @@ const validator = (page: number) => async () => {
         const releaseDateLimit = new Date();
         releaseDateLimit.setDate(releaseDateLimit.getDate() + 14);
         if(releaseDate < releaseDateLimit) {
-            alert("Release date must be at least 7 days in the future");
-            return;
+            sheetStack.addSheet(
+                Box(
+                    Label("Warning: ").setTextSize("xl").setFontWeight("bold").addStyle(css`
+                        :host {
+                        color: red;
+                    }
+                    `),
+                Label("Your release is in under 14 days!").setTextSize("lg").setFontWeight("bold"),
+                PrimaryButton("OK").onClick(() => sheetStack.removeOne()))
+            );
         }
     }
 
