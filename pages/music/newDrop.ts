@@ -76,11 +76,30 @@ const validator = (page: number) => async () => {
         creationState.validationState.setValue(`${error.issues[0].path[0]}: ${error.issues[0].message}`);
         return;
     }
+
     creationState.validationState.setValue(undefined);
     await saveDrop()
     creationState.page.setValue(page + 1);
     creationState.validationState.setValue(undefined);
 };
+
+const checkDate = () => {
+    const releaseDate = new Date(creationState.release.value);
+    const releaseDateLimit = new Date();
+    releaseDateLimit.setDate(releaseDateLimit.getDate() + 14);
+    if (releaseDate < releaseDateLimit) {
+        sheetStack.addSheet(
+            Grid(
+                SheetHeader("Warning", sheetStack),
+                Grid(
+                    Label("Your release date is less than 14 days away. Are you sure you want to continue?").setTextSize("lg"),
+                    PrimaryButton("Ok").onClick(() => sheetStack.removeOne())
+                ).setGap(),
+            )
+        );
+    }
+}
+
 
 async function saveDrop() {
     await API.patchIdByDropsByMusic({ path: { id: dropId }, body: Object.fromEntries(Object.entries(creationState).map(([key, state]) => [key, state.value])) });
@@ -101,6 +120,8 @@ creationState.primaryGenre.listen((_, old) => {
         creationState.secondaryGenre.setValue(undefined);
     }
 });
+
+creationState.release.listen((_, old) => {checkDate()})
 
 const wizard = creationState.page.map((page) => {
     if (page == 0) {
