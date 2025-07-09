@@ -121,7 +121,7 @@ creationState.primaryGenre.listen((_, old) => {
     }
 });
 
-creationState.release.listen((_, old) => {checkDate()})
+creationState.release.listen(() => {checkDate()})
 
 const wizard = creationState.page.map((page) => {
     if (page == 0) {
