@@ -40,7 +40,7 @@ const userSheet = async (user: User) => {
                 Label(`Groups: ${user.groups.join(", ")}`),
             ),
             Grid(
-                Label("Wallet"),
+                Label(`Wallet - ${wallet.accountType ?? "No wallet"} - ${wallet.cut ?? NaN}%`),
                 Label(`Restrained: ${wallet.balance?.restrained.toFixed(2) ?? "No wallet"}`),
                 Label(`Unrestrained: ${wallet.balance?.unrestrained.toFixed(2) ?? "No wallet"}`),
                 Label(`Generated: ${wallet.transactions?.filter((t) => t.amount > 0).map((t) => t.amount).reduce((a, b) => a + b, 0).toFixed(2) ?? "No wallet"}`),
