@@ -13,6 +13,7 @@ import deezer from "../music-landing/assets/deezer.svg";
 import tidal from "../music-landing/assets/tidal.svg";
 // @deno-types="https://raw.githubusercontent.com/lucsoft-DevTeam/lucsoft.de/master/custom.d.ts"
 import apple from "../music-landing/assets/apple.svg";
+import {creationState} from "../music/newDrop.ts";
 
 export const allowedAudioFormats = ["audio/flac", "audio/wav", "audio/mp3"];
 export const allowedImageFormats = ["image/png", "image/jpeg"];
@@ -283,4 +284,21 @@ export const ExistingSongDialog = (dropSongs: WriteSignal<Song[]>, songs: Song[]
 
 export function randomInteger(lower: number, upper: number): number {
     return lower + Math.floor(Math.random() * (upper - lower + 1));
+}
+
+export function checkDate(date: string) {
+    const releaseDate = new Date(date);
+    const releaseDateLimit = new Date();
+    releaseDateLimit.setDate(releaseDateLimit.getDate() + 14);
+    if (releaseDate < releaseDateLimit) {
+        sheetStack.addSheet(
+            Grid(
+                SheetHeader("Warning", sheetStack),
+                Grid(
+                    Label("Your release date is less than 14 days away. Are you sure you want to continue?").setTextSize("lg"),
+                    PrimaryButton("Ok").onClick(() => sheetStack.removeOne())
+                ).setGap(),
+            )
+        );
+    }
 }
