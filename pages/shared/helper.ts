@@ -13,7 +13,6 @@ import deezer from "../music-landing/assets/deezer.svg";
 import tidal from "../music-landing/assets/tidal.svg";
 // @deno-types="https://raw.githubusercontent.com/lucsoft-DevTeam/lucsoft.de/master/custom.d.ts"
 import apple from "../music-landing/assets/apple.svg";
-import {creationState} from "../music/newDrop.ts";
 
 export const allowedAudioFormats = ["audio/flac", "audio/wav", "audio/mp3"];
 export const allowedImageFormats = ["image/png", "image/jpeg"];
@@ -296,9 +295,9 @@ export function checkDate(date: string) {
                 SheetHeader("Warning", sheetStack),
                 Grid(
                     Label("Your release date is less than 14 days away. Are you sure you want to continue?").setTextSize("lg"),
-                    PrimaryButton("Ok").onClick(() => sheetStack.removeOne())
+                    PrimaryButton("Ok").onClick(() => sheetStack.removeOne()),
                 ).setGap(),
-            )
+            ),
         );
     }
 }

@@ -1,4 +1,4 @@
-import { activeUser, allowedImageFormats, ErrorMessage, getSecondary, permCheck, ProfileData, RegisterAuthRefresh, sheetStack, showProfilePicture, streamingImages, checkDate } from "shared/helper.ts";
+import { activeUser, allowedImageFormats, checkDate, ErrorMessage, getSecondary, permCheck, ProfileData, RegisterAuthRefresh, sheetStack, showProfilePicture, streamingImages } from "shared/helper.ts";
 import { userHistoryEventEntry } from "shared/userHistoryEventEntry.ts";
 import { appendBody, asRef, asRefRecord, Box, CachedPages, Checkbox, Content, createCachedLoader, createFilePicker, createIndexPaginationLoader, createRoute, css, DateInput, DialogContainer, DropDown, Empty, FullWidthSection, Grid, Image, isMobile, Label, PrimaryButton, SecondaryButton, Spinner, StartRouting, TextAreaInput, TextButton, TextInput, WebGenTheme } from "webgen/mod.ts";
 import { templateArtwork } from "../../assets/imports.ts";
@@ -13,7 +13,7 @@ import { EditArtistsDialog, ManageSongs } from "./views/table.ts";
 
 await RegisterAuthRefresh();
 
-const recordGenres: Record<string, string[]> = genres
+const recordGenres: Record<string, string[]> = genres;
 
 const isAdmin = permCheck(
     "/hmsys/user/manage",
@@ -118,8 +118,8 @@ creationState.songs.listen((val) => {
 });
 
 creationState.release.listen((val) => {
-    if(val){
-        checkDate(val)
+    if (val) {
+        checkDate(val);
     }
 });
 

@@ -1,4 +1,4 @@
-import { allowedImageFormats, ErrorMessage, getSecondary, RegisterAuthRefresh, sheetStack, checkDate } from "shared/helper.ts";
+import { allowedImageFormats, checkDate, ErrorMessage, getSecondary, RegisterAuthRefresh, sheetStack } from "shared/helper.ts";
 import { appendBody, asRef, asRefRecord, Box, Color, Content, createFilePicker, css, DateInput, DialogContainer, DropDown, Empty, FullWidthSection, Grid, Image, Label, PrimaryButton, SecondaryButton, SheetHeader, Spinner, TextAreaInput, TextInput, WebGenTheme } from "webgen/mod.ts";
 import { templateArtwork } from "../../assets/imports.ts";
 import { DynaNavigation } from "../../components/nav.ts";
@@ -78,7 +78,7 @@ const validator = (page: number) => async () => {
     }
 
     creationState.validationState.setValue(undefined);
-    await saveDrop()
+    await saveDrop();
     creationState.page.setValue(page + 1);
     creationState.validationState.setValue(undefined);
 };
@@ -104,10 +104,10 @@ creationState.primaryGenre.listen((_, old) => {
 });
 
 creationState.release.listen((val) => {
-    if(val){
+    if (val) {
         checkDate(val);
     }
-})
+});
 
 const wizard = creationState.page.map((page) => {
     if (page == 0) {
@@ -178,7 +178,7 @@ const wizard = creationState.page.map((page) => {
                 SecondaryButton("Back").setJustifyContent("center").onClick(() => creationState.page.setValue(3)),
                 PrimaryButton("Submit").onPromiseClick(async () => {
                     await saveDrop();
-                    
+
                     await API.postTypeByTypeByDropByMusic({
                         path: {
                             dropId,
