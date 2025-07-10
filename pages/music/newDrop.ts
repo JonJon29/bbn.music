@@ -1,4 +1,4 @@
-import { allowedImageFormats, ErrorMessage, getSecondary, RegisterAuthRefresh, sheetStack } from "shared/helper.ts";
+import { allowedImageFormats, ErrorMessage, getSecondary, RegisterAuthRefresh, sheetStack, checkDate } from "shared/helper.ts";
 import { appendBody, asRef, asRefRecord, Box, Color, Content, createFilePicker, css, DateInput, DialogContainer, DropDown, Empty, FullWidthSection, Grid, Image, Label, PrimaryButton, SecondaryButton, SheetHeader, Spinner, TextAreaInput, TextInput, WebGenTheme } from "webgen/mod.ts";
 import { templateArtwork } from "../../assets/imports.ts";
 import { DynaNavigation } from "../../components/nav.ts";
@@ -83,24 +83,6 @@ const validator = (page: number) => async () => {
     creationState.validationState.setValue(undefined);
 };
 
-const checkDate = () => {
-    const releaseDate = new Date(creationState.release.value);
-    const releaseDateLimit = new Date();
-    releaseDateLimit.setDate(releaseDateLimit.getDate() + 14);
-    if (releaseDate < releaseDateLimit) {
-        sheetStack.addSheet(
-            Grid(
-                SheetHeader("Warning", sheetStack),
-                Grid(
-                    Label("Your release date is less than 14 days away. Are you sure you want to continue?").setTextSize("lg"),
-                    PrimaryButton("Ok").onClick(() => sheetStack.removeOne())
-                ).setGap(),
-            )
-        );
-    }
-}
-
-
 async function saveDrop() {
     await API.patchIdByDropsByMusic({ path: { id: dropId }, body: Object.fromEntries(Object.entries(creationState).map(([key, state]) => [key, state.value])) });
 }
@@ -121,7 +103,11 @@ creationState.primaryGenre.listen((_, old) => {
     }
 });
 
-creationState.release.listen(() => {checkDate()})
+creationState.release.listen((val) => {
+    if(val){
+        checkDate(val);
+    }
+})
 
 const wizard = creationState.page.map((page) => {
     if (page == 0) {
